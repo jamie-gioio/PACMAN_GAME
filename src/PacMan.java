@@ -145,6 +145,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+    char nextDirection = ' ';
 
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -254,9 +255,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
         }
 
+        g.setColor(Color.YELLOW); 
         for (Block food : foods) {
             g.fillOval(food.x, food.y, food.width, food.height);
-            g.setColor(Color.YELLOW);       
+                  
         }
 
         g.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -271,6 +273,12 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     public void move() {
+
+        if (nextDirection != ' ' && pacman.x % tileSize == 0 && pacman.y % tileSize == 0) {
+            pacman.updateDirection(nextDirection);
+            updatePacmanImage();
+        }
+
         pacman.x += pacman.velocityX;
         pacman.y += pacman.velocityY;
 
@@ -334,6 +342,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         pacman.reset();
         pacman.velocityX = 0;
         pacman.velocityY = 0;
+        nextDirection = ' ';
 
         for(Block ghost : ghosts) {
             ghost.reset();
@@ -359,7 +368,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override 
     public void keyReleased(KeyEvent e) {
-        // System.out.println("KeyEvent " + e.getKeyCode());
 
         if (gameOver) {
             loadmap();
@@ -367,19 +375,32 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             lives = 3;
             score = 0;
             gameOver = false;
+            nextDirection = ' ';
             gameLoop.start();
         }
 
         if(e.getKeyCode() == KeyEvent.VK_UP) {
-            pacman.updateDirection('U');
+            nextDirection = 'U';
         } else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-            pacman.updateDirection('D');
+            nextDirection = 'D';
         } else if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-            pacman.updateDirection('L');
+            nextDirection = 'L';
         } else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            pacman.updateDirection('R');
+            nextDirection = 'R';
         }
 
+        if (pacman.direction == 'U') {
+            pacman.image = pacmanUp;
+        } else if (pacman.direction == 'D') {
+            pacman.image = pacmanDown;
+        } else if (pacman.direction == 'L') {
+            pacman.image = pacmanLeft;
+        } else if (pacman.direction == 'R') {
+            pacman.image = pacmanRight;
+        }
+    }
+
+    void updatePacmanImage() {
         if (pacman.direction == 'U') {
             pacman.image = pacmanUp;
         } else if (pacman.direction == 'D') {
