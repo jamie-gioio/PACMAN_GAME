@@ -16,6 +16,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         int startX;
         int startY;
         char direction = 'U';
+        char ghostColor = ' ';
 
         int velocityX = 0;
         int velocityY = 0;
@@ -213,18 +214,22 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 }
                 else if (tileMapChar == 'b') {
                     Block ghost = new Block(blueGhostDown, x, y, tileSize, tileSize);
+                    ghost.ghostColor = 'b';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'p') {
                     Block ghost = new Block(pinkGhostDown, x, y, tileSize, tileSize);
+                    ghost.ghostColor = 'p';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'r') {
                     Block ghost = new Block(redGhostDown, x, y, tileSize, tileSize);
+                    ghost.ghostColor = 'r';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'y') {
                     Block ghost = new Block(yellowGhostDown, x, y, tileSize, tileSize);
+                    ghost.ghostColor = 'y';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == ' ') {
@@ -314,6 +319,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     ghost.updateDirection(newDirection);
                 }
             }
+
+            updateGhostImage(ghost);
         }
 
         Block foodEaten = null;
@@ -409,6 +416,25 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             pacman.image = pacmanLeft;
         } else if (pacman.direction == 'R') {
             pacman.image = pacmanRight;
+        }
+    }
+
+    void updateGhostImage(Block ghost) {
+        char d = ghost.direction;
+
+        switch (ghost.ghostColor) {
+            case 'b':
+                ghost.image = d == 'U'? blueGhostUp : d == 'D' ? blueGhostDown : d == 'L' ? blueGhostLeft : blueGhostRight;
+                break;
+            case 'p':
+                ghost.image = d == 'U'? pinkGhostUp : d == 'D' ? pinkGhostDown : d == 'L' ? pinkGhostLeft : pinkGhostRight;
+                break;
+            case 'r':
+                ghost.image = d == 'U'? redGhostUp : d == 'D' ? redGhostDown : d == 'L' ? redGhostLeft : redGhostRight;
+                break;
+            case 'y':
+                ghost.image = d == 'U'? yellowGhostUp : d == 'D' ? yellowGhostDown : d == 'L' ? yellowGhostLeft : yellowGhostRight;
+                break;
         }
     }
 
