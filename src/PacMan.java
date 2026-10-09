@@ -141,6 +141,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     Block pacman;
 
     Timer gameLoop;
+    JButton startButton;
+    Timer countdownTimer;
+    int countDown = 0;
+
+
     char[] directions = {'U', 'D', 'L', 'R'};
     Random random = new Random();
     int score = 0;
@@ -151,6 +156,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setBackground(Color.BLACK);
+        setLayout(null);
 
         addKeyListener(this);
         setFocusable(true);
@@ -192,8 +198,34 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
 
         gameLoop = new Timer(50, this);
-        gameLoop.start();
-    }   
+        int btnW = 120, btnH = 40;
+        startButton = new JButton("Start");
+        startButton.setBounds((boardWidth - btnW) / 2, (boardHeight - btnH) / 2, btnW, btnH);
+        startButton.setFocusable(false);
+        startButton.addActionListener(e -> startCountDown());
+        add(startButton);
+    } 
+    
+    void startCountDown() {
+        remove(startButton);
+        revalidate();
+        countDown = 3;
+        repaint();
+        requestFocusInWindow();
+
+        countdownTimer = new Timer(1000, e -> {
+            countDown--;
+            if (countDown <= 0) {
+                countDown = 0;
+                countdownTimer.stop();
+                gameLoop.start();
+            }
+            repaint();
+
+        });
+        countdownTimer.start();
+    }
+
 
     public void loadmap() {
         walls = new HashSet<Block>();
@@ -272,6 +304,16 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         else {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+        }
+
+        if (countDown > 0) {
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 96));
+            String text = String.valueOf(countDown);
+            FontMetrics fm = g.getFontMetrics();
+            int tx = (boardWidth - fm.stringWidth(text)) / 2;
+            int ty = (boardHeight + fm.getAscent() - fm.getDescent() / 2);
+            g.drawString(text, tx, ty);
         }
         
         
@@ -375,6 +417,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override 
     public void keyReleased(KeyEvent e) {
+
+        if (!gameLoop.isRunning() && !gameOver) {
+            return;
+        }
 
         if (gameOver) {
             loadmap();

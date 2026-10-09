@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 
@@ -23,7 +25,13 @@ public class App {
         frame.pack();
         pacmanGame.requestFocus();
         frame.setVisible(true);
-    
+
+        
+        
+
+        
+
+        
         
     }
 }
