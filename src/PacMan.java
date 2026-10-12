@@ -3,6 +3,8 @@ import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Random;
 import javax.swing.*;
+import java.awt.geom.Path2D;
+import java.awt.geom.Area;
 
 public class PacMan extends JPanel implements ActionListener, KeyListener {
 
@@ -17,6 +19,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         int startY;
         char direction = 'U';
         char ghostColor = ' ';
+        boolean roundTL, roundTR, roundBL, roundBR;
 
         int velocityX = 0;
         int velocityY = 0;
@@ -139,6 +142,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     HashSet<Block> foods;
     HashSet<Block> ghosts;
     Block pacman;
+    Area wallArea;
 
     Timer gameLoop;
     JButton startButton;
@@ -242,6 +246,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
                 if (tileMapChar == 'X') {
                     Block wall = new Block(wallImage, x, y, tileSize, tileSize);
+                    wall.roundTL = isPath(r - 1, c) && isPath(r, c - 1);
+                    wall.roundTR = isPath(r - 1, c) && isPath(r, c + 1);
+                    wall.roundBL = isPath(r + 1, c) && isPath(r, c - 1);
+                    wall.roundBR = isPath(r + 1, c) && isPath(r, c + 1);
                     walls.add(wall);
                 }
                 else if (tileMapChar == 'b') {
@@ -273,6 +281,42 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
+
+        wallArea = new Area();
+        for (Block wall : walls) {
+            wallArea.add(new Area(wallShape(wall)));
+        }
+    }
+
+    boolean isPath(int r, int c) {
+        if (r < 0 || r >= rowAmount || c < 0 || c >= columnAmount) {
+            return false;
+        }
+        return tileMap[r].charAt(c) != 'X';
+    }
+    
+    Shape wallShape(Block w) {
+        double x = w.x, y = w.y, s = w.width;
+        double rad = tileSize / 3.0;
+
+        double tl = w.roundTL ? rad : 0;
+        double tr = w.roundTR ? rad : 0;
+        double br = w.roundBR ? rad : 0;
+        double bl = w.roundBL ? rad : 0;
+
+        Path2D.Double p = new Path2D.Double();
+        p.moveTo(x + tl, y);
+        p.lineTo(x + s - tr, y);
+        p.quadTo(x + s, y, x + s, y + tr);          
+        p.lineTo(x + s, y + s - br);
+        p.quadTo(x + s, y + s, x + s - br, y + s);  
+        p.lineTo(x + bl, y + s);
+        p.quadTo(x, y + s, x, y + s - bl);         
+        p.lineTo(x, y + tl);
+        p.quadTo(x, y, x + tl, y);                
+        p.closePath();
+        return p;
+
     }
 
     public void paintComponent(Graphics g) {
@@ -283,41 +327,17 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void draw(Graphics g) {
         g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
 
-        int[] dr = {-1, 1, 0, 0};
-        int[] dc = {0, 0, -1, 1};
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (int r= 0; r < rowAmount; r++) {
-            for (int c = 0; c < columnAmount; c++) {
-                if (tileMap[r].charAt(c) != 'X') continue;
+        g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
 
-                int x = c * tileSize;
-                int y = r * tileSize;
-
-                g.setColor(Color.BLUE);
-                g.fillRect(x, y, tileSize, tileSize);
-
-                g.setColor(Color.CYAN);
-                for (int i = 0; i < 4; i++) {
-                    int nr = r + dr[i];
-                    int nc = c + dc[i];
-
-                    if (nr < 0 || nr >= rowAmount || nc < 0 || nc >= columnAmount) continue;
-
-                    if (tileMap[nr].charAt(nc) == 'X') continue;
-                    
-                    if (i == 0) {
-                        g.drawLine(x, y, x + tileSize - 1, y);
-                    } else if (i == 1) {
-                        g.drawLine(x, y + tileSize - 1, x + tileSize - 1, y + tileSize - 1);
-                    } else if (i == 2) {
-                        g.drawLine(x, y, x, y + tileSize - 1);
-                    } else {
-                        g.drawLine(x + tileSize - 1, y, x + tileSize - 1, y + tileSize - 1);
-
-                    }
-                }
-            }
-        }
+        g2.setColor(Color.BLUE);
+        g2.fill(wallArea);
+        g2.setColor(new Color(100, 150, 255));
+        g2.setStroke(new BasicStroke(2f));
+        g2.draw(wallArea);
+        g2.setStroke(new BasicStroke(1f));
 
         // for (Block wall : walls) {
         //     g.setColor(Color.BLUE);
