@@ -297,7 +297,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     
     Shape wallShape(Block w) {
         double x = w.x, y = w.y, s = w.width;
-        double rad = tileSize / 3.0;
+        double rad = tileSize / 5.0;
 
         double tl = w.roundTL ? rad : 0;
         double tr = w.roundTR ? rad : 0;
@@ -330,14 +330,12 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
-
-        g2.setColor(Color.BLUE);
+        g2.setColor(Color.BLACK);
         g2.fill(wallArea);
-        g2.setColor(new Color(100, 150, 255));
-        g2.setStroke(new BasicStroke(2f));
+        g2.setColor(Color.BLUE);
+        g2.setStroke(new BasicStroke(3f));
         g2.draw(wallArea);
-        g2.setStroke(new BasicStroke(1f));
+        g2.setStroke(new BasicStroke(2f));
 
         // for (Block wall : walls) {
         //     g.setColor(Color.BLUE);
