@@ -143,6 +143,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     HashSet<Block> ghosts;
     Block pacman;
     Area wallArea;
+    Area outsideArea;
 
     Timer gameLoop;
     JButton startButton;
@@ -253,22 +254,22 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     walls.add(wall);
                 }
                 else if (tileMapChar == 'b') {
-                    Block ghost = new Block(blueGhostDown, x, y, tileSize, tileSize);
+                    Block ghost = new Block(blueGhostDown, x, y, tileSize - 2, tileSize - 2);
                     ghost.ghostColor = 'b';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'p') {
-                    Block ghost = new Block(pinkGhostDown, x, y, tileSize, tileSize);
+                    Block ghost = new Block(pinkGhostDown, x, y, tileSize - 2, tileSize - 2);
                     ghost.ghostColor = 'p';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'r') {
-                    Block ghost = new Block(redGhostDown, x, y, tileSize, tileSize);
+                    Block ghost = new Block(redGhostDown, x, y, tileSize - 2, tileSize - 2);
                     ghost.ghostColor = 'r';
                     ghosts.add(ghost);
                 }
                 else if (tileMapChar == 'y') {
-                    Block ghost = new Block(yellowGhostDown, x, y, tileSize, tileSize);
+                    Block ghost = new Block(yellowGhostDown, x, y, tileSize - 2, tileSize - 2);
                     ghost.ghostColor = 'y';
                     ghosts.add(ghost);
                 }
@@ -277,7 +278,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     foods.add(food);
                 }
                 else if (tileMapChar == 'P') {
-                    pacman = new Block(pacmanRight, x, y, tileSize - 3, tileSize - 3);
+                    pacman = new Block(pacmanRight, x, y, tileSize - 2, tileSize - 2);
                 }
             }
         }
@@ -286,6 +287,9 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         for (Block wall : walls) {
             wallArea.add(new Area(wallShape(wall)));
         }
+
+        outsideArea = new Area(new Rectangle(0, 0, boardWidth, boardHeight));
+        outsideArea.subtract(wallArea);
     }
 
     boolean isPath(int r, int c) {
@@ -332,9 +336,30 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         g2.setColor(Color.BLACK);
         g2.fill(wallArea);
-        g2.setColor(Color.BLUE);
-        g2.setStroke(new BasicStroke(4f));
+
+        Shape oldClip = g2.getClip();
+        g2.clip(outsideArea);
+        for (int i = 4; i >= 1; i--) {
+            g2.setColor(new Color(0, 120, 255, 30));
+            g2.setStroke(new BasicStroke(2f + i * 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.draw(wallArea);
+        }
+
+        g2.setClip(oldClip);
+
+        g2.setColor(new Color(30, 90, 255));
+        g2.setStroke(new BasicStroke(1f));
         g2.draw(wallArea);
+        g2.setStroke(new BasicStroke(0.5f));
+
+
+        // g2.setColor(Color.BLUE);
+        // g2.fill(wallArea);
+        // g2.setColor(Color.CYAN);
+        // g2.setStroke(new BasicStroke(8f));
+        // g2.setColor(Color.RED);
+        // g2.setStroke(new BasicStroke(2f));
+        // g2.draw(wallArea);
 
         // for (Block wall : walls) {
         //     g.setColor(Color.BLUE);
