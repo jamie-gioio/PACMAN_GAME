@@ -277,7 +277,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     foods.add(food);
                 }
                 else if (tileMapChar == 'P') {
-                    pacman = new Block(pacmanRight, x, y, tileSize, tileSize);
+                    pacman = new Block(pacmanRight, x, y, tileSize - 3, tileSize - 3);
                 }
             }
         }
@@ -333,9 +333,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         g2.setColor(Color.BLACK);
         g2.fill(wallArea);
         g2.setColor(Color.BLUE);
-        g2.setStroke(new BasicStroke(3f));
+        g2.setStroke(new BasicStroke(4f));
         g2.draw(wallArea);
-        g2.setStroke(new BasicStroke(2f));
 
         // for (Block wall : walls) {
         //     g.setColor(Color.BLUE);
