@@ -283,10 +283,49 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void draw(Graphics g) {
         g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
 
-        for (Block wall : walls) {
-            g.setColor(Color.BLUE);
-            g.fillRect(wall.x, wall.y, wall.width, wall.height);
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+
+        for (int r= 0; r < rowAmount; r++) {
+            for (int c = 0; c < columnAmount; c++) {
+                if (tileMap[r].charAt(c) != 'X') continue;
+
+                int x = c * tileSize;
+                int y = r * tileSize;
+
+                g.setColor(Color.BLUE);
+                g.fillRect(x, y, tileSize, tileSize);
+
+                g.setColor(Color.CYAN);
+                for (int i = 0; i < 4; i++) {
+                    int nr = r + dr[i];
+                    int nc = c + dc[i];
+
+                    if (nr < 0 || nr >= rowAmount || nc < 0 || nc >= columnAmount) continue;
+
+                    if (tileMap[nr].charAt(nc) == 'X') continue;
+                    
+                    if (i == 0) {
+                        g.drawLine(x, y, x + tileSize - 1, y);
+                    } else if (i == 1) {
+                        g.drawLine(x, y + tileSize - 1, x + tileSize - 1, y + tileSize - 1);
+                    } else if (i == 2) {
+                        g.drawLine(x, y, x, y + tileSize - 1);
+                    } else {
+                        g.drawLine(x + tileSize - 1, y, x + tileSize - 1, y + tileSize - 1);
+
+                    }
+                }
+            }
         }
+
+        // for (Block wall : walls) {
+        //     g.setColor(Color.BLUE);
+        //     g.fillRect(wall.x, wall.y, wall.width, wall.height);
+
+        //     g.setColor(Color.YELLOW);
+        //     g.drawRect(wall.x, wall.y, wall.width - 1, wall.height - 1);
+        // }
 
         for (Block ghost : ghosts) {
             g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
@@ -315,6 +354,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             int ty = (boardHeight + fm.getAscent() - fm.getDescent() / 2);
             g.drawString(text, tx, ty);
         }
+    
         
         
     }
