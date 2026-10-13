@@ -113,6 +113,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     
     private Image wallImage;
     private Image powerFood;
+    private Image startBtn;
 
     private String[] tileMap = {
         "XXXXXXXXXXXXXXXXXXX",
@@ -126,7 +127,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         "XXXX X XXrXX X XXXX",
         "        bpy        ",
         "XXXX X XXXXX X XXXX",
-        "OOOX X       X XOOO",
+        "OOOX X OOOOO X XOOO",
         "XXXX X XXXXX X XXXX",
         "X        X        X",
         "X XX XXX X XXX XX X",
@@ -194,6 +195,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         wallImage = new ImageIcon(getClass().getResource("assets/wall.png")).getImage();
         powerFood = new ImageIcon(getClass().getResource("assets/powerFood.png")).getImage();
+        // JButton button = new JButton(startBtn);
 
         loadmap();
 
@@ -203,9 +205,29 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
 
         gameLoop = new Timer(50, this);
-        int btnW = 120, btnH = 40;
-        startButton = new JButton("Start");
-        startButton.setBounds((boardWidth - btnW) / 2, (boardHeight - btnH) / 2, btnW, btnH);
+
+        int row = 12;
+        int firstCol = 8;
+        int lastCol = 12;
+
+        ImageIcon startBtn = new ImageIcon(getClass().getResource("assets/startBtn.png"));
+
+        int btnW = (lastCol - firstCol + 1) * tileSize;
+        int btnH = btnW * startBtn.getIconHeight() / startBtn.getIconWidth();
+
+        int btnX = (firstCol - 1) * tileSize;
+        int btnY = (row - 1) * tileSize + (tileSize - btnH) / 2;
+
+        Image scaled = startBtn.getImage().getScaledInstance(btnW, btnH, Image.SCALE_SMOOTH);
+
+        startButton = new JButton(new ImageIcon(scaled));
+
+        startButton.setBorderPainted(false);
+        startButton.setContentAreaFilled(false);
+        startButton.setFocusPainted(false);
+        startButton.setOpaque(false);
+        startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        startButton.setBounds(btnX, btnY, btnW, btnH);
         startButton.setFocusable(false);
         startButton.addActionListener(e -> startCountDown());
         add(startButton);
