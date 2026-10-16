@@ -374,23 +374,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         g2.draw(wallArea);
         g2.setStroke(new BasicStroke(0.5f));
 
-
-        // g2.setColor(Color.BLUE);
-        // g2.fill(wallArea);
-        // g2.setColor(Color.CYAN);
-        // g2.setStroke(new BasicStroke(8f));
-        // g2.setColor(Color.RED);
-        // g2.setStroke(new BasicStroke(2f));
-        // g2.draw(wallArea);
-
-        // for (Block wall : walls) {
-        //     g.setColor(Color.BLUE);
-        //     g.fillRect(wall.x, wall.y, wall.width, wall.height);
-
-        //     g.setColor(Color.YELLOW);
-        //     g.drawRect(wall.x, wall.y, wall.width - 1, wall.height - 1);
-        // }
-
         for (Block ghost : ghosts) {
             g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
         }
