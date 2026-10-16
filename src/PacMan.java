@@ -112,8 +112,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image pacmanRight; 
     
     private Image wallImage;
-    private Image powerFood;
-    private Image startBtn;
+    // private Image powerFood;
+    // private Image startBtn;
 
     private String[] tileMap = {
         "XXXXXXXXXXXXXXXXXXX",
@@ -194,7 +194,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         pacmanRight = new ImageIcon(getClass().getResource("assets/pacmanRight.png")).getImage();
 
         wallImage = new ImageIcon(getClass().getResource("assets/wall.png")).getImage();
-        powerFood = new ImageIcon(getClass().getResource("assets/powerFood.png")).getImage();
+        // powerFood = new ImageIcon(getClass().getResource("assets/powerFood.png")).getImage();
         // JButton button = new JButton(startBtn);
 
         loadmap();
