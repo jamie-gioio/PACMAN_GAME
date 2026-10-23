@@ -8,77 +8,77 @@ import java.awt.geom.Area;
 
 public class PacMan extends JPanel implements ActionListener, KeyListener {
 
-    class Block {
-        int x;
-        int y;
-        int width;
-        int height;
-        Image image;
+    // class Block {
+    //     int x;
+    //     int y;
+    //     int width;
+    //     int height;
+    //     Image image;
 
-        int startX;
-        int startY;
-        char direction = 'U';
-        char ghostColor = ' ';
-        boolean roundTL, roundTR, roundBL, roundBR;
+    //     int startX;
+    //     int startY;
+    //     char direction = 'U';
+    //     char ghostColor = ' ';
+    //     boolean roundTL, roundTR, roundBL, roundBR;
 
-        int velocityX = 0;
-        int velocityY = 0;
+    //     int velocityX = 0;
+    //     int velocityY = 0;
 
-        Block(Image image, int x, int y, int width, int height) {
-            this.image = image;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
+    //     Block(Image image, int x, int y, int width, int height) {
+    //         this.image = image;
+    //         this.x = x;
+    //         this.y = y;
+    //         this.width = width;
+    //         this.height = height;
 
-            this.startX = x;
-            this.startY = y;
-        }
+    //         this.startX = x;
+    //         this.startY = y;
+    //     }
 
-        void updateDirection(char direction) {
-            char prevDirection = this.direction;
-            this.direction = direction;
-            updateVelocity();
-            this.x += this.velocityX;
-            this.y += this.velocityY;
+    //     void updateDirection(char direction) {
+    //         char prevDirection = this.direction;
+    //         this.direction = direction;
+    //         updateVelocity();
+    //         this.x += this.velocityX;
+    //         this.y += this.velocityY;
 
-            for (Block wall : walls) {
-                if (collision(this, wall)) {
-                    this.x -= this.velocityX;
-                    this.y -= this.velocityY;
-                    this.direction = prevDirection;
-                    updateVelocity();
-                }
-            }
-        }
+    //         for (Block wall : walls) {
+    //             if (collision(this, wall)) {
+    //                 this.x -= this.velocityX;
+    //                 this.y -= this.velocityY;
+    //                 this.direction = prevDirection;
+    //                 updateVelocity();
+    //             }
+    //         }
+    //     }
 
-        void updateVelocity() {
-            if(this.direction == 'U') {
-                this.velocityX = 0;
-                this.velocityY = -tileSize/4;
-            } 
+    //     void updateVelocity() {
+    //         if(this.direction == 'U') {
+    //             this.velocityX = 0;
+    //             this.velocityY = -tileSize/4;
+    //         } 
             
-            else if(this.direction == 'D') {
-                this.velocityX = 0;
-                this.velocityY = tileSize/4;
-            } 
+    //         else if(this.direction == 'D') {
+    //             this.velocityX = 0;
+    //             this.velocityY = tileSize/4;
+    //         } 
             
-            else if(this.direction == 'L') {
-                this.velocityX = -tileSize/4;
-                this.velocityY = 0;
-            } 
+    //         else if(this.direction == 'L') {
+    //             this.velocityX = -tileSize/4;
+    //             this.velocityY = 0;
+    //         } 
             
-            else if(this.direction == 'R') {
-                this.velocityX = tileSize/4;
-                velocityY = 0;
-            }
-        }
+    //         else if(this.direction == 'R') {
+    //             this.velocityX = tileSize/4;
+    //             velocityY = 0;
+    //         }
+    //     }
 
-        void reset() {
-            this.x = this.startX;
-            this.y = this.startY;
-        }
-    }
+    //     void reset() {
+    //         this.x = this.startX;
+    //         this.y = this.startY;
+    //     }
+    // }
 
     private int rowAmount = 21;
     private int columnAmount = 19;
@@ -201,7 +201,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         for (Block ghost : ghosts) {
             char newDirection = directions[random.nextInt(4)];
-            ghost.updateDirection(newDirection);
+            ghost.updateDirection(newDirection, walls);
         }
 
         gameLoop = new Timer(50, this);
@@ -409,7 +409,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void move() {
 
         if (nextDirection != ' ' && pacman.x % tileSize == 0 && pacman.y % tileSize == 0) {
-            pacman.updateDirection(nextDirection);
+            pacman.updateDirection(nextDirection, walls);
             updatePacmanImage();
         }
 
@@ -417,7 +417,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         pacman.y += pacman.velocityY;
 
         for (Block wall : walls) {
-            if (collision(pacman, wall)) {
+            if (Block.collision(pacman, wall)) {
                 pacman.x -= pacman.velocityX;
                 pacman.y -= pacman.velocityY;
                 break;
@@ -425,7 +425,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         } 
 
         for (Block ghost : ghosts) {
-            if (collision(ghost, pacman)) {
+            if (Block.collision(ghost, pacman)) {
                 lives -= 1;
                 if (lives == 0) {
                     gameOver = true;
@@ -435,17 +435,17 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             }    
 
             if (ghost.y == tileSize*9 && ghost.direction != 'U' && ghost.direction != 'D') {
-                ghost.updateDirection('U');
+                ghost.updateDirection('U', walls);
             }
             ghost.x += ghost.velocityX;
             ghost.y += ghost.velocityY;
 
             for (Block wall : walls) {
-                if (collision(ghost, wall) || ghost.x + ghost.width >= boardWidth) {
+                if (Block.collision(ghost, wall) || ghost.x + ghost.width >= boardWidth) {
                     ghost.x -= ghost.velocityX;
                     ghost.y -= ghost.velocityY;
                     char newDirection = directions[random.nextInt(4)];
-                    ghost.updateDirection(newDirection);
+                    ghost.updateDirection(newDirection, walls);
                 }
             }
 
@@ -454,7 +454,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         Block foodEaten = null;
         for (Block food : foods) {
-            if (collision(pacman, food)) {
+            if (Block.collision(pacman, food)) {
                 foodEaten = food;
                 score += 10;
             }
@@ -467,12 +467,12 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    public boolean collision(Block a, Block b) {
-        return  a.x < b.x + b.width &&
-                a.x + a.width > b.x &&
-                a.y < b.y + b.height &&
-                a.y + a.height > b.y;
-    }
+    // public boolean collision(Block a, Block b) {
+    //     return  a.x < b.x + b.width &&
+    //             a.x + a.width > b.x &&
+    //             a.y < b.y + b.height &&
+    //             a.y + a.height > b.y;
+    // }
     
     public void resetPositions() {
         pacman.reset();
@@ -483,7 +483,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         for(Block ghost : ghosts) {
             ghost.reset();
             char newDirection = directions[random.nextInt(4)];
-            ghost.updateDirection(newDirection);
+            ghost.updateDirection(newDirection, walls);
         }
     }
 
