@@ -8,78 +8,6 @@ import java.awt.geom.Area;
 
 public class PacMan extends JPanel implements ActionListener, KeyListener {
 
-    // class Block {
-    //     int x;
-    //     int y;
-    //     int width;
-    //     int height;
-    //     Image image;
-
-    //     int startX;
-    //     int startY;
-    //     char direction = 'U';
-    //     char ghostColor = ' ';
-    //     boolean roundTL, roundTR, roundBL, roundBR;
-
-    //     int velocityX = 0;
-    //     int velocityY = 0;
-
-    //     Block(Image image, int x, int y, int width, int height) {
-    //         this.image = image;
-    //         this.x = x;
-    //         this.y = y;
-    //         this.width = width;
-    //         this.height = height;
-
-    //         this.startX = x;
-    //         this.startY = y;
-    //     }
-
-    //     void updateDirection(char direction) {
-    //         char prevDirection = this.direction;
-    //         this.direction = direction;
-    //         updateVelocity();
-    //         this.x += this.velocityX;
-    //         this.y += this.velocityY;
-
-    //         for (Block wall : walls) {
-    //             if (collision(this, wall)) {
-    //                 this.x -= this.velocityX;
-    //                 this.y -= this.velocityY;
-    //                 this.direction = prevDirection;
-    //                 updateVelocity();
-    //             }
-    //         }
-    //     }
-
-    //     void updateVelocity() {
-    //         if(this.direction == 'U') {
-    //             this.velocityX = 0;
-    //             this.velocityY = -tileSize/4;
-    //         } 
-            
-    //         else if(this.direction == 'D') {
-    //             this.velocityX = 0;
-    //             this.velocityY = tileSize/4;
-    //         } 
-            
-    //         else if(this.direction == 'L') {
-    //             this.velocityX = -tileSize/4;
-    //             this.velocityY = 0;
-    //         } 
-            
-    //         else if(this.direction == 'R') {
-    //             this.velocityX = tileSize/4;
-    //             velocityY = 0;
-    //         }
-    //     }
-
-    //     void reset() {
-    //         this.x = this.startX;
-    //         this.y = this.startY;
-    //     }
-    // }
-
     private int rowAmount = 21;
     private int columnAmount = 19;
     private int tileSize = 32;
@@ -112,9 +40,17 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image pacmanRight; 
     
     private Image wallImage;
-    // private Image powerFood;
-    // private Image startBtn;
 
+    /* Map Layout
+       - 'X': Wall
+       - ' ': Pathway with food placed in center of block
+       - 'O': Nothing placed in block (empty)
+       - 'P': Pac-Man
+       - 'b': Blue ghost
+       - 'r': Red ghost
+       - 'p': Pink ghost
+       - 'y': Yellow ghost
+    */
     private String[] tileMap = {
         "XXXXXXXXXXXXXXXXXXX",
         "X        X        X",
@@ -194,11 +130,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         pacmanRight = new ImageIcon(getClass().getResource("assets/pacmanRight.png")).getImage();
 
         wallImage = new ImageIcon(getClass().getResource("assets/wall.png")).getImage();
-        // powerFood = new ImageIcon(getClass().getResource("assets/powerFood.png")).getImage();
-        // JButton button = new JButton(startBtn);
 
         loadmap();
 
+        // Gives every ghost a random starting direction
         for (Block ghost : ghosts) {
             char newDirection = directions[random.nextInt(4)];
             ghost.updateDirection(newDirection, walls);
@@ -206,22 +141,25 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         gameLoop = new Timer(50, this);
 
+        // Placement of start button: centered over tile columns 8-12 on row 12
         int row = 12;
         int firstCol = 8;
         int lastCol = 12;
 
         ImageIcon startBtn = new ImageIcon(getClass().getResource("assets/startBtn.png"));
 
+        // Scale the button to span the columns while keeping its aspect ratio
         int btnW = (lastCol - firstCol + 1) * tileSize;
         int btnH = btnW * startBtn.getIconHeight() / startBtn.getIconWidth();
 
         int btnX = (firstCol - 1) * tileSize;
         int btnY = (row - 1) * tileSize + (tileSize - btnH) / 2;
 
+
         Image scaled = startBtn.getImage().getScaledInstance(btnW, btnH, Image.SCALE_SMOOTH);
 
+        // Make the button look like a plain image: no border, no fill or focus ring 
         startButton = new JButton(new ImageIcon(scaled));
-
         startButton.setBorderPainted(false);
         startButton.setContentAreaFilled(false);
         startButton.setFocusPainted(false);
@@ -233,6 +171,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         add(startButton);
     } 
     
+    /**
+     * Called when the start button is clicked. Removes the button, shows a 
+     * 3-2-1 countdown (one number per second) and starts 
+     * when it reaches zero. Also gives the panel keyboard focus
+    */
     void startCountDown() {
         remove(startButton);
         revalidate();
@@ -305,15 +248,25 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             }
         }
 
+        // Merge all walls into one shape so the outline is drawn once
         wallArea = new Area();
         for (Block wall : walls) {
             wallArea.add(new Area(wallShape(wall)));
         }
 
+        // Everything on the board that is not a wall (used for the glow clip)
         outsideArea = new Area(new Rectangle(0, 0, boardWidth, boardHeight));
         outsideArea.subtract(wallArea);
     }
 
+    /**
+     * Tells whether a tile is walkable (not a wall)
+     * 
+     * @param r tile row
+     * @param c tile column
+     * @return {@code true} if the tile is inside the board and is not an 
+     *         {@code 'X'}; {@code false} for walls and out of bounds tiles 
+     */
     boolean isPath(int r, int c) {
         if (r < 0 || r >= rowAmount || c < 0 || c >= columnAmount) {
             return false;
@@ -321,15 +274,26 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         return tileMap[r].charAt(c) != 'X';
     }
     
+    /**
+     * Builds the outline of a single wall tie as a square whose corners are
+     * rounded according to the block's {@code roundTL}, {@code roundTR},
+     * {@code roundBL} and {@code roundBR} flags. Rounded corners use quadratic
+     * curves with a radius of one fifth of a tile.
+     * 
+     * @param w the wall block
+     * @return the wall's outline shape
+     */
     Shape wallShape(Block w) {
         double x = w.x, y = w.y, s = w.width;
         double rad = tileSize / 5.0;
 
+        // Radius of each corner: rad if rounded, 0 if square 
         double tl = w.roundTL ? rad : 0;
         double tr = w.roundTR ? rad : 0;
         double br = w.roundBR ? rad : 0;
         double bl = w.roundBL ? rad : 0;
 
+        // Trace clockwise from the top edge
         Path2D.Double p = new Path2D.Double();
         p.moveTo(x + tl, y);
         p.lineTo(x + s - tr, y);
@@ -416,6 +380,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         pacman.x += pacman.velocityX;
         pacman.y += pacman.velocityY;
 
+        // Undo the move if it ran into a wall
         for (Block wall : walls) {
             if (Block.collision(pacman, wall)) {
                 pacman.x -= pacman.velocityX;
@@ -425,7 +390,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         } 
 
         for (Block ghost : ghosts) {
-            if (Block.collision(ghost, pacman)) {
+            // Caught by a ghost
+            if (Block.collision(ghost, pacman)) {       
                 lives -= 1;
                 if (lives == 0) {
                     gameOver = true;
@@ -440,6 +406,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             ghost.x += ghost.velocityX;
             ghost.y += ghost.velocityY;
 
+            // On a wall (or right edge) hit, step back and choose a new random direction
             for (Block wall : walls) {
                 if (Block.collision(ghost, wall) || ghost.x + ghost.width >= boardWidth) {
                     ghost.x -= ghost.velocityX;
@@ -452,6 +419,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             updateGhostImage(ghost);
         }
 
+        // Eat food (removal happens after the loop to avoid modifyoing the set while iterating)
         Block foodEaten = null;
         for (Block food : foods) {
             if (Block.collision(pacman, food)) {
@@ -461,19 +429,19 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         foods.remove(foodEaten);
 
+        // Level cleared: rebuild the map and put everyone back at their start
         if (foods.isEmpty()) {
             loadmap();
             resetPositions();
         }
     }
 
-    // public boolean collision(Block a, Block b) {
-    //     return  a.x < b.x + b.width &&
-    //             a.x + a.width > b.x &&
-    //             a.y < b.y + b.height &&
-    //             a.y + a.height > b.y;
-    // }
-    
+
+    /**
+     * Returns Pac-Man and all the ghosts to their starting tiles. PacMan's 
+     * velocity and queued directions are cleared, and each ghost is given a 
+     * fresh random direction 
+     */
     public void resetPositions() {
         pacman.reset();
         pacman.velocityX = 0;
@@ -540,6 +508,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+
+    /**
+     * Sets PacMan's image to the one that matched his current 
+     * {@code direction}
+     */
     void updatePacmanImage() {
         if (pacman.direction == 'U') {
             pacman.image = pacmanUp;
@@ -552,6 +525,13 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+
+    /**
+     * Set's a ghost's image from its colour ({@code ghostColor}: 'b', 'p',
+     * 'r', 'y') and current {@code direction}
+     * 
+     * @param ghost the ghost to update
+     */
     void updateGhostImage(Block ghost) {
         char d = ghost.direction;
 
